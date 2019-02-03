@@ -7,6 +7,8 @@ import psutil
 import gc
 import numpy as np
 import pandas as pd
+from functools import reduce
+from six.moves import reduce
 
 def memory():
     """Determine memory specifications of the machine.
