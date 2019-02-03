@@ -1,0 +1,8 @@
+Download the next files from: https://www.kaggle.com/c/instacart-market-basket-analysis/data
+
+*aisle.csv
+*departments.csv
+*order_products_prior.csv
+*order_prior_train.csv
+*orders.csv
+*products.csv
