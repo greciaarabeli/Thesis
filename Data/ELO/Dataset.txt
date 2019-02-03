@@ -1,0 +1,7 @@
+Download the next files from: https://www.kaggle.com/c/elo-merchant-category-recommendation/data
+
+*historical_transactions.csv
+*merchants.csv
+*new_merchant_transactions.csv
+*test.csv
+*train.csv
