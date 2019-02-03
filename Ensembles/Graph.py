@@ -1204,4 +1204,6 @@ def cluster_ensembles(cluster_runs, hdf5_file_name = None, verbose = False, N_cl
     return cluster_ensemble[np.argmax(score)]
     
     
-do_graph = cluster_ensembles(list_ensembles, verbose = True, N_clusters_max = 5)
+do_graph(list_ensembles, verbose = True, N_clusters_max = 5):
+    final_clustering=cluster_ensembles(list_ensembles, verbose, N_clusters_max)
+    return final_clustering
