@@ -11,6 +11,8 @@ train = pd.read_csv('train.csv', parse_dates=["first_active_month"])
 historical_transactions=historical_transactions.append(new_transactions)
 
 historical_transactions["batch"] =0
+train["batch"] =0
+test["batch"] =0
 
 card_list=historical_transactions.card_id.unique()
 random.Random(4).shuffle(card_list)
@@ -22,9 +24,9 @@ y=len(card_list)
 for i in range(x,y,n_card):
     x=i
     print(i)
-    historical_transactions["batch"] = np.where(historical_transactions["card_id"].isin(card_list[x:x + n_card]), 'cards_%s' % i, historical_transactions["batch"])
-    test['batch']=np.where(test["card_id"].isin(card_list[x:x + n_card]), 'cards_%s' % i, test["batch"])
-    train['batch']=np.where(train["card_id"].isin(card_list[x:x + n_card]), 'cards_%s' % i, train["batch"])
+    historical_transactions["batch"] = np.where(historical_transactions["card_id"].isin(card_list[x:x + n_card]), 'users_%s' % i, historical_transactions["batch"])
+    test['batch']=np.where(test["card_id"].isin(card_list[x:x + n_card]), 'users_%s' % i, test["batch"])
+    train['batch']=np.where(train["card_id"].isin(card_list[x:x + n_card]), 'users_%s' % i, train["batch"])
     
  train.to_csv('1_train.csv')
  test.to_csv('1_test.csv')
