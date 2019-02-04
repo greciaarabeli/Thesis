@@ -1,6 +1,14 @@
 """ Function to calculate the next best action according to each data set. 
     For Instacart it uses Classifier and for Elo uses Regression
-    Parameters:
+    Parameters:train
+               test
+               data
+               return_pred: 0 if you just need the accuracy score and 1 if you need the prediction
+               num_cluster
+               dataset: 'instacart' or 'elo'
+               
+   Return: if 0 return average f1 for instacart and average MSE for elo
+           if 1 return the same as 0 plus the predictions for test
 """
 
 from catboost import CatBoostRegressor
