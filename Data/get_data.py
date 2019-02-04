@@ -51,16 +51,16 @@ def get_data_batch(dataset_name, batch):
 
     else:
         chunksize = 10 ** 6
-        chunks_train = pd.read_csv("elo/1_train.csv", parse_dates=["first_active_month"],chunksize=chunksize)
+        chunks_train = pd.read_csv("1_train.csv", parse_dates=["first_active_month"],chunksize=chunksize, index_col=0)
         train = pd.concat(valid(chunks_train, batch))
 
-        chunks_test = pd.read_csv("elo/1_test.csv", parse_dates=["first_active_month"], chunksize=chunksize)
+        chunks_test = pd.read_csv("1_test.csv", parse_dates=["first_active_month"], chunksize=chunksize, index_col=0)
         test = pd.concat(valid(chunks_test, batch))
 
-        data= pd.read_csv("elo/1_historical_transactions.csv",parse_dates=['purchase_date'], chunksize=chunksize)
-        historical_trans= pd.concat(valid(data, batch))
+        chunks_data= pd.read_csv("1_historical_transactions.csv",parse_dates=['purchase_date'], chunksize=chunksize, index_col=0)
+        data= pd.concat(valid(chunks_data, batch))
 
-        merchants = pd.read_csv('elo/merchants.csv')
+        merchants = pd.read_csv('merchants.csv')
 
         for df in [train, test, merchants]:  # , data]:
             missing_impute(df)
@@ -104,7 +104,3 @@ def get_data_batch(dataset_name, batch):
 
 
     return train, test, data
-
-
-
-    
