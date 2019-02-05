@@ -7,7 +7,7 @@
                dataset: 'instacart' or 'elo'
                
    Return: if 0 return average f1 for instacart and average MSE for elo
-           if 1 return the same as 0 plus the predictions for test
+           if 1 return the same as 0 plus the predictions for test"""
 
 
 import xgboost
