@@ -1,6 +1,86 @@
+""" Function to calculate the next best action according to each data set using Lightfm recomendation system.
+    Parameters:train
+               test
+               data
+               return_pred: 0 if you just need the accuracy score and 1 if you need the prediction
+               dataset: 'instacart' or 'elo'
+               
+   Return: if 0 return average f1 for instacart and average MSE for elo
+           if 1 return the same as 0 plus the predictions for test
+"""
+
+
 from lightfm import LightFM
 import numpy as np
 import pandas as pd
+from scipy import sparse
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics import mean_squared_error
+
+def create_user_dict(interactions):
+    '''
+    Function to create a user dictionary based on their index and number in interaction dataset
+    Required Input -
+        interactions - dataset create by create_interaction_matrix
+    Expected Output -
+        user_dict - Dictionary type output containing interaction_index as key and user_id as value
+    '''
+    user_id = list(interactions.index)
+    user_dict = {}
+    counter = 0
+    for i in user_id:
+        user_dict[i] = counter
+        counter += 1
+    return user_dict
+
+def create_item_emdedding_distance_matrix(model,interactions):
+    df_item_norm_sparse = sparse.csr_matrix(model.item_embeddings)
+    similarities = cosine_similarity(df_item_norm_sparse)
+    item_emdedding_distance_matrix = pd.DataFrame(similarities)
+    item_emdedding_distance_matrix.columns = interactions.columns
+    item_emdedding_distance_matrix.index = interactions.columns
+    return item_emdedding_distance_matrix
+
+def runMF(interactions, n_components, loss, epoch,n_jobs):
+    x = sparse.csr_matrix(interactions.values)
+    model = LightFM(no_components= n_components, loss=loss,learning_schedule='adagrad')
+    model.fit(x,epochs=epoch,num_threads = n_jobs)
+    return model
+
+def create_item_dict(df,id_col,name_col):
+    '''
+    Function to create an item dictionary based on their item_id and item name
+    Required Input -
+        - df = Pandas dataframe with Item information
+        - id_col = Column name containing unique identifier for an item
+        - name_col = Column name containing name of the item
+    Expected Output -
+        item_dict = Dictionary type output containing item_id as key and item_name as value
+    '''
+    item_dict ={}
+    for i in range(df.shape[0]):
+        item_dict[(df.loc[i,id_col])] = df.loc[i,name_col]
+    return item_dict
+
+def create_interaction_matrix(df,user_col, item_col, rating_col, norm= False, threshold = None):
+    '''
+    Function to create an interaction matrix dataframe from transactional type interactions
+    Required Input -
+        - df = Pandas DataFrame containing user-item interactions
+        - user_col = column name containing user's identifier
+        - item_col = column name containing item's identifier
+        - rating col = column name containing user feedback on interaction with a given item
+        - norm (optional) = True if a normalization of ratings is needed
+        - threshold (required if norm = True) = value above which the rating is favorable
+    Expected output -
+        - Pandas dataframe with user-item interactions ready to be fed in a recommendation algorithm
+    '''
+    interactions = df.groupby([user_col, item_col])[rating_col] \
+            .sum().unstack().reset_index(). \
+            fillna(0).set_index(user_col)
+    if norm:
+        interactions = interactions.applymap(lambda x: 1 if x > threshold else 0)
+    return interactions
 
 def lightfm(train, test, data, return_pred, dataset):
     if dataset=='instacart':
@@ -22,17 +102,17 @@ def lightfm(train, test, data, return_pred, dataset):
         grouped_train_i = train.groupby(["user_id", "product_id"])["reordered"].aggregate("sum").reset_index()
         grouped_test_i = test.groupby(["user_id", "product_id"])["reordered"].aggregate("sum").reset_index()
 
-        interactions_i = lightfm_form.create_interaction_matrix(df=grouped_train_i,
+        interactions_i = create_interaction_matrix(df=grouped_train_i,
                                                                 user_col='user_id',
                                                                 item_col='product_id',
                                                                 rating_col='reordered')
 
-        interactions_test_i = lightfm_form.create_interaction_matrix(df=grouped_test_i,
+        interactions_test_i = create_interaction_matrix(df=grouped_test_i,
                                                                      user_col='user_id',
                                                                      item_col='product_id',
                                                                      rating_col='reordered')
 
-        mf_model = lightfm_form.runMF(interactions=interactions_i,
+        mf_model = runMF(interactions=interactions_i,
                                       n_components=30, loss='warp', epoch=40, n_jobs=4)
 
         test_history = test[test['reordered'] == 1].groupby('order_id').aggregate({'product_id': lambda x: list(x)})
@@ -77,13 +157,13 @@ def lightfm(train, test, data, return_pred, dataset):
         test=test.merge(train_avgtarget, on='merchant_id', how='left')
         test_train=train.append(test)
         grouped_train_test = test_train.groupby(["merchant_id", "card_id"])["target_y"].aggregate("mean").reset_index()
-        interactions = lightfm_form.create_interaction_matrix(df=grouped_train_test,user_col='merchant_id',item_col='card_id',rating_col='target_y')
+        interactions = create_interaction_matrix(df=grouped_train_test,user_col='merchant_id',item_col='card_id',rating_col='target_y')
         train_unique=train.drop_duplicates(subset=['card_id'])
         test_unique=test.drop_duplicates(subset=['card_id'])
         item_features= train_unique.append(test_unique)[['feature_1', 'feature_2', 'feature_3',
            'num_transactions', 'sum_trans', 'mean_trans', 'std_trans', 'min_trans',
            'max_trans', 'year_first', 'month_first']]
-        mf_model = lightfm_form.runMF(interactions=interactions,
+        mf_model = runMF(interactions=interactions,
                                       n_components=30, loss='warp', epoch=40, n_jobs=4)
         # Create User Dict
         user_dict = create_user_dict(interactions=interactions)
@@ -106,11 +186,12 @@ def lightfm(train, test, data, return_pred, dataset):
             scores_rmse=scores_rmse.append(
                 {'card_id': cards, 'pred': pred.target_x.mean()},ignore_index=True)
         scores_rmse=scores_rmse.merge(test_unique[['card_id', 'target_x']], on='card_id')
+        
         scores_rmse=scores_rmse.fillna(scores_rmse.pred.mean())
         if return_pred==0:
-            return np.sqrt(mean_squared_error(scores_rmse.pred, scores_rmse.target_x)), scores_rmse
+            return np.sqrt(mean_squared_error(scores_rmse.pred, scores_rmse.target_x))
         else:
-            return np.sqrt(mean_squared_error(scores_rmse.pred, scores_rmse.target_x)), scores_rmse
+            return np.sqrt(mean_squared_error(scores_rmse.pred, scores_rmse.target_x)), scores_rmse[['card_id','pred']]
     
     
     
