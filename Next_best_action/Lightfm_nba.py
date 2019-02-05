@@ -82,7 +82,7 @@ def create_interaction_matrix(df,user_col, item_col, rating_col, norm= False, th
         interactions = interactions.applymap(lambda x: 1 if x > threshold else 0)
     return interactions
 
-def lightfm(train, test, data, return_pred, dataset):
+def do_lightfm(train, test, data, return_pred, dataset):
     if dataset=='instacart':
         set1 = set(np.unique(train.product_id))
         set2 = set(np.unique(test.product_id))
