@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
-
+from functools import reduce
+from six.moves import reduce
 
 
 def emProcess(list_ensembles,N , nEnsCluster, iterations):
