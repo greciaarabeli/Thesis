@@ -16,7 +16,7 @@ from sklearn.metrics import mean_squared_error
 import numpy as np
 import pandas as pd
 
-def catboost(train, test,data, return_pred, num_cluster, dataset): 
+def do_catboost(train, test,data, return_pred, num_cluster, dataset): 
     cols_to_use=['feature_1', 'feature_2', 'feature_3',
         'num_transactions', 'sum_trans', 'mean_trans',
        'std_trans', 'min_trans', 'max_trans', 'year_first', 'month_first']
