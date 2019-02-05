@@ -13,7 +13,7 @@
 import xgboost
 from sklearn.metrics import mean_squared_error
 import pandas as pd
-import numpy as pd
+import numpy as np
 
 
 def do_xgboost(train, test, data, return_pred, dataset):
