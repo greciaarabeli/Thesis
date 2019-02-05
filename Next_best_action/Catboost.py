@@ -4,7 +4,6 @@
                test
                data
                return_pred: 0 if you just need the accuracy score and 1 if you need the prediction
-               num_cluster
                dataset: 'instacart' or 'elo'
                
    Return: if 0 return average f1 for instacart and average MSE for elo
@@ -66,7 +65,7 @@ def catboost(train, test,data, return_pred, num_cluster, dataset):
         else:
             return sum_recall/n,sum_precision/n ,sum_fscore/n, y_pred
 
-        print('FINISH CATBOOST')
+       
 
     else:
         
@@ -94,3 +93,4 @@ def catboost(train, test,data, return_pred, num_cluster, dataset):
             return np.sqrt(mean_squared_error(predict_test.target.values, y_test))
         else:
             return np.sqrt(mean_squared_error(predict_test.target.values, y_test)), predict_test
+     print('FINISH CATBOOST')
