@@ -19,7 +19,6 @@ def cluster_graph(train, test,data, num_cluster, batch, dataset):
         y_pred_df['batch']=batch
         y_pred_df['type_cluster']='cluster_graph'
         #y_pred_df.to_csv('clusters_graph.csv')
-        return y_pred_df
     
     else:
         FG = nx.from_pandas_edgelist(data, source='card_id', target='merchant_id', edge_attr=True)
