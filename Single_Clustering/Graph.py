@@ -8,7 +8,7 @@ import numpy as np
         Parameters:train, test,data, num_cluster, batch, dataset
         Return:  y_pred_test_df, pandas table with columns cluster, user_id, batch and type_cluster"""
 
-def cluster_graph(train, test,data, return_pred, num_cluster, batch, dataset):
+def cluster_graph(train, test,data, num_cluster, batch, dataset):
     if dataset=='instacart':
         FG = nx.from_pandas_edgelist(train, source='user_id', target='product_name', edge_attr=True)
         parts = community_louvain.best_partition(FG)
