@@ -1,3 +1,5 @@
+"""https://github.com/GGiecold/Cluster_Ensembles/tree/master/src/Cluster_Ensembles"""
+
 import subprocess
 import tables
 import operator
