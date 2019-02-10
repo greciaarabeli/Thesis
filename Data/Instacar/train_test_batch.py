@@ -2,10 +2,10 @@ import numpy as np
 import pandas as pd
 import random
 
-order_products_prior = pd.read_csv("order_products__prior.csv")
-orders = pd.read_csv("orders.csv")
+order_products_prior = pd.read_csv("/home/grecia/Dropbox/SKOLTECH/thesis/data_sets/instacart/order_products__prior.csv")
+orders = pd.read_csv("/home/grecia/Dropbox/SKOLTECH/thesis/data_sets/instacart/orders.csv")
 orders=orders.loc[orders['eval_set']=='prior']
-products= pd.read_csv("products.csv")
+products= pd.read_csv("/home/grecia/Dropbox/SKOLTECH/thesis/data_sets/instacart/products.csv")
 
 data=pd.merge(order_products_prior, orders, on='order_id', how='left')
 data=pd.merge(data, products, on='product_id', how='left')
@@ -30,5 +30,6 @@ orders_set_trainlist=train.order_id.unique()
 total=train.groupby(['order_id']).size().reset_index(name='total')
 train=train.merge(total,on='order_id')
 
-train.to_csv('1_train.csv')
-test.to_csv('1_test.csv')
+train.to_csv('/home/grecia/Dropbox/SKOLTECH/thesis/data_sets/instacart/1_train.csv')
+test.to_csv('/home/grecia/Dropbox/SKOLTECH/thesis/data_sets/instacart/1_test.csv')
+
