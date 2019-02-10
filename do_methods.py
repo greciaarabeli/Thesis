@@ -25,9 +25,9 @@ dataset_list=['instacart', 'elo']
 single_clustering_list=[Features.cluster_features,Graph.cluster_graph, Time_Series.cluster_kshape]
 single_clustering_name=['cluster_features','cluster_graph', 'cluster_timeseries']
 
-ensemble_clustering_list=[Mixture_Models.do_mixturemodels,
+ensemble_clustering_list=[Graph_ensemble.do_graph, Mixture_Models.do_mixturemodels,
                           Voting.do_voting]
-ensemble_clustering_name=['Mixture_Models', 'Voting']
+ensemble_clustering_name=['Graph_ensemble', 'Mixture_Models', 'Voting']
 
 
 methods_list = [easiest_nba.easiest, Lightfm_nba.do_lightfm, xgboost_nba.do_xgboost, Catboost_nba.do_catboost]
@@ -35,8 +35,8 @@ methods_name=['simplest','lightfm','xgboost','catboost']
 
 return_pred=0
 batch='users_2000'
-file_save_results='complete_results_batch2000.csv'
-file_save_clusters='cluster_user_batch_2000.csv'
+file_save_results='complete_results_batch2000_complete.csv'
+file_save_clusters='cluster_user_batch_2000_complete.csv'
 
 
 ###  START DOING EXPERIMENTS  ###
@@ -68,6 +68,7 @@ for dataset in dataset_list:
     
     # SINGLE CLUSTER
     clustering_labels=pd.DataFrame()
+        
     b=0
     for clustering in single_clustering_list:
         clustering_labels_b=clustering(train, test,data, num_clusters, batch, dataset)
@@ -124,8 +125,7 @@ for dataset in dataset_list:
                         #except:
                             #pass
                 scores_df = scores_df.append(
-                    {'method': methods_name[c], 'clustering': single_clustering_name[b], 'ensemble': 'no_ensemble', 'score': score, 
-                     'batch': batch, 'cluster_num': cluster, 'database':dataset},ignore_index=True)
+                    {'method': methods_name[c], 'clustering': single_clustering_name[b], 'ensemble': 'no_ensemble', 'score':                                  score, 'batch': batch, 'cluster_num': cluster, 'database':dataset},ignore_index=True)
                 scores_df.to_csv(file_save_results)
                     
                 c=c+1
@@ -136,31 +136,40 @@ for dataset in dataset_list:
     #ENSEMBLE
     cluster_table=pd.pivot_table(clustering_labels, values='cluster', index=['user_id'], 
                                   columns=['type_cluster'], aggfunc=np.sum).dropna(how='any', axis=0)
-    list_ensembles=np.append([np.array(cluster_table.cluster_features), np.array(cluster_table.cluster_kshape)], [np.array(cluster_table.cluster_graph)], axis=0)
+    list_ensembles=np.append([np.array(cluster_table.cluster_features), np.array(cluster_table.cluster_kshape)],     [np.array(cluster_table.cluster_graph)], axis=0)
 
     d=0
     for ensemble in ensemble_clustering_list:
         final_ensemble=ensemble(list_ensembles, nEnsCluster=num_clusters, iterations=10, verbose = True, N_clusters_max =num_clusters , hdf5_file_name=None)
         final_ensemble_df=pd.DataFrame({'user_id':cluster_table.index, 'cluster':final_ensemble})
-        final_ensemble_df['ensemble']=ensemble_clustering_name[d]
-        final_ensemble_df['database']=dataset
-        final_ensemble_df['user_id']=clustering_labels_b['card_id']
-        final_ensemble_df['batch']=batch
-        final_ensemble_df['clustering']='no_cluster'
-        
-        clustering_labels=clustering_labels.append(final_ensemble_df)
+        if dataset=='instacart':
+            final_ensemble_df['ensemble']=ensemble_clustering_name[d]
+            final_ensemble_df['database']='instacart'
+            final_ensemble_df['card_id']=final_ensemble_df['user_id']
+            final_ensemble_df['batch']=batch
+            final_ensemble_df['clustering']='no_cluster'
+            clustering_labels=clustering_labels.append(final_ensemble_df)
+
+            test_d = test.merge(final_ensemble_df, on='user_id')
+            train_d = train.merge(final_ensemble_df, on='user_id')
+            data_d=data
+            
+        else:
+            final_ensemble_df['ensemble']=ensemble_clustering_name[d]
+            final_ensemble_df['database']='elo'
+            final_ensemble_df['user_id']=final_ensemble_df['card_id']
+            final_ensemble_df['batch']=batch
+            final_ensemble_df['clustering']='no_cluster'
+            clustering_labels=clustering_labels.append(final_ensemble_df)
+            
+
+            test_d = test.merge(final_ensemble_df, on='card_id')
+            train_d = train.merge(final_ensemble_df, on='card_id')
+            data_d= data.merge(final_ensemble_df, on='card_id')
         
         clustering_labels.to_csv(file_save_clusters)
         
-        try:
-            data_d= data.merge(final_ensemble_df, on='user_id')
-        except:
-            data_d=data
-
-        train_d=train.merge(final_ensemble_df, on='user_id')
-        test_d=test.merge(final_ensemble_df, on='user_id')
-        
-        cluster_list=train_d.cluster.unique()
+        cluster_list = train_d.cluster.unique()
 
         for cluster in cluster_list:
             try:
@@ -171,75 +180,26 @@ for dataset in dataset_list:
             test_cluster=test_d[test_d["cluster"]==cluster]
             e=0
             for method in methods_list:
-                score=method(train_cluster, test_cluster, data_cluster, return_pred, dataset)
+                if dataset == 'instacart':
+                    if len(test_cluster.user_id.unique()) >1 and len(train_cluster.user_id.unique()) >1:
+                    #try:
+                        score=method(train_cluster, test_cluster, data_cluster, return_pred, dataset)
+                    else:
+                        score=np.nan
+                        #except:
+                            #pass
+                else:
+                    if len(test_cluster.card_id.unique()) >1 and len(train_cluster.card_id.unique()) >1:
+                    #try:
+                        score=method(train_cluster, test_cluster, data_cluster, return_pred, dataset)
+                    else:
+                        score=np.nan
+                        #except:
+                            #pass
                 scores_df = scores_df.append(
-            {'method': methods_name[e], 'clustering': 'no_cluster', 'ensemble': ensemble_clustering_name[d], 'score': score, 
-             'batch': batch, 'cluster_num': cluster, 'database':dataset},ignore_index=True)
+                    {'method': methods_name[e], 'clustering': 'no_cluster', 'ensemble': ensemble_clustering_name[d], 'score':                                  score, 'batch': batch, 'cluster_num': cluster, 'database':dataset},ignore_index=True)
                 scores_df.to_csv(file_save_results)
+
                 e=e+1
         d=d+1
-    print('FINISH METHODS FOR ENSEMBLE')
-
-    
-    # SINGLE CLUSTER
-    b=0
-    for clustering in single_clustering_list:
-        clustering_labels=clustering(train, test,data, num_clusters, batch, dataset)
-        
-        cluster_user=cluster_user.append({'batch': clustering_label.batch, 'cluster': clustering_label.cluster, 
-                                                  'clustering': cluster_label.type_cluster, 'user_id': cluster_label.ix[:,0], 
-                                                  'ensemble':'no_ensemble', 'databse': dataset})
-        cluster_user.to_csv('file_save_clusters')
-        test_b = test.merge(cluster_labels, on='user_id')
-        train_b = train.merge(cluster_labels, on='user_id')
-        data_b= data.merge(cluster_labels, on='user_id')
-        cluster_list = train_b.cluster.unique()
-        
-        for cluster in cluster_list:
-            data_cluster= data_b[data_b["cluster"]==cluster]
-            train_cluster=train_b[train_b["cluster"]==cluster]
-            test_cluster=test_b[test_b["cluster"]==cluster]
-            c=0
-            for method in methods_list:
-                score=method(train_cluster, test_cluster, data_cluster, return_pred, dataset)
-                scores_df = scores_df.append(
-            {'method': method_name[c], 'clustering': single_clustering_name[b], 'ensemble': 'no_ensemble', 'score': score, 
-             'batch': batch, 'cluster_num': cluster, 'database':dataset},ignore_index=True)
-                scores_df.to_csv(file_save_results)
-                c=c+1
-        b=b+1
-        
-    print('FINISH METHODS FOR SINGLE CLUSTER')
-      
-    #ENSEMBLE
-    cluster_table=pd.pivot_table(clustering_labels, values='cluster', index=['user_id'], 
-                                  columns=['type_cluster'], aggfunc=np.sum).dropna(how='any', axis=0)
-    list_ensembles=np.append([np.array(cluster_table.cluster_features), np.array(cluster_table.cluster_kshape)], [np.array(cluster_table.cluster_graph)], axis=0)
-    
-    d=0
-    for ensemble in ensemble_clustering_list:
-        final_ensemble=ensemble
-        final_ensemble_df=pd.DataFrame({'user_id':cluster_table.index, 'label':ensemble})
-        cluster_user=cluster_user.append({'batch': batch, 'cluster': final_ensemble_df.label, 
-                                                  'clustering': 'no_cluster', 'user_id': final_ensemble_df.ix[:,0], 
-                                                  'ensemble':ensemble_clustering_name[d], 'databse': dataset})
-        cluster_user.to_csv('file_save_clusters')
-        data_d=data.merge(final_ensemble_df, on='user_id')
-        train_d=train.merge(final_ensemble_df, on='user_id')
-        test_d=test.merge(final_ensemble_df, on='user_id')
-        cluster_list=train_d.cluster.unique()
-        
-        for cluster in cluster_list:
-            data_cluster= data_d[data_d["cluster"]==cluster]
-            train_cluster=train_d[train_d["cluster"]==cluster]
-            test_cluster=test_d[test_d["cluster"]==cluster]
-            e=0
-            for method in methods_list:
-                score=method(train_ensemble, test_ensemble, data_ensemble, return_pred, dataset)
-                scores_df = scores_df.append(
-            {'method': method_name[e], 'clustering': 'no_cluster', 'ensemble': ensemble_clustering_name[d], 'score': score, 
-             'batch': batch, 'cluster_num': cluster, 'database':dataset},ignore_index=True)
-                scores_df.to_csv(file_save_results)
-
-    d=d+1
     print('FINISH METHODS FOR ENSEMBLE')
