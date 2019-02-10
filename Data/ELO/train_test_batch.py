@@ -2,11 +2,11 @@ import pandas as pd
 import numpy as np
 import random
 
-new_transactions = pd.read_csv('new_merchant_transactions.csv', parse_dates=['purchase_date'])
-merchants = pd.read_csv('merchants.csv')
-historical_transactions = pd.read_csv('historical_transactions.csv',parse_dates=['purchase_date'])
-test = pd.read_csv('test.csv', parse_dates=["first_active_month"])
-train = pd.read_csv('train.csv', parse_dates=["first_active_month"])
+new_transactions = pd.read_csv('/home/grecia/Dropbox/SKOLTECH/thesis/data_sets/ELO/new_merchant_transactions.csv', parse_dates=['purchase_date'])
+merchants = pd.read_csv('/home/grecia/Dropbox/SKOLTECH/thesis/data_sets/ELO/merchants.csv')
+historical_transactions = pd.read_csv('/home/grecia/Dropbox/SKOLTECH/thesis/data_sets/ELO/historical_transactions.csv',parse_dates=['purchase_date'])
+test = pd.read_csv('/home/grecia/Dropbox/SKOLTECH/thesis/data_sets/ELO/test.csv', parse_dates=["first_active_month"])
+train = pd.read_csv('/home/grecia/Dropbox/SKOLTECH/thesis/data_sets/ELO/train.csv', parse_dates=["first_active_month"])
 
 historical_transactions=historical_transactions.append(new_transactions)
 
@@ -28,7 +28,8 @@ for i in range(x,y,n_card):
     test['batch']=np.where(test["card_id"].isin(card_list[x:x + n_card]), 'users_%s' % i, test["batch"])
     train['batch']=np.where(train["card_id"].isin(card_list[x:x + n_card]), 'users_%s' % i, train["batch"])
     
- train.to_csv('1_train.csv')
- test.to_csv('1_test.csv')
- historical_transactions.to_csv('1_historical_transactions.csv')
+ train.to_csv('/home/grecia/Dropbox/SKOLTECH/thesis/data_sets/ELO/1_train.csv')
+ test.to_csv('/home/grecia/Dropbox/SKOLTECH/thesis/data_sets/ELO/1_test.csv')
+ historical_transactions.to_csv('/home/grecia/Dropbox/SKOLTECH/thesis/data_sets/ELO/1_historical_transactions.csv')
+ 
  
