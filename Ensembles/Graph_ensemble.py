@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 from functools import reduce
 from six.moves import reduce
+from sklearn.metrics import normalized_mutual_info_score
 import sys
 
 
