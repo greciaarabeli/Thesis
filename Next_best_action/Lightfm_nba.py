@@ -16,6 +16,9 @@ import pandas as pd
 from scipy import sparse
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.metrics import mean_squared_error
+from lightfm.evaluation import precision_at_k
+from lightfm.evaluation import auc_score
+from lightfm.evaluation import recall_at_k
 
 def create_user_dict(interactions):
     '''
@@ -32,6 +35,8 @@ def create_user_dict(interactions):
         user_dict[i] = counter
         counter += 1
     return user_dict
+
+
 
 def create_item_emdedding_distance_matrix(model,interactions):
     df_item_norm_sparse = sparse.csr_matrix(model.item_embeddings)
@@ -119,12 +124,19 @@ def do_lightfm(train, test, data, return_pred, dataset):
         test_history = pd.merge(test_history, test[['order_id', 'user_id']], on='order_id')
         test_history = test_history.drop_duplicates(subset=['order_id', 'user_id'], keep='first')
         n_users, n_items = interactions_i.shape
-
+        
+        user_dict = create_user_dict(interactions=interactions_i)
+   
+        print(interactions_i.shape)
+        print(interactions_test_i.shape)
+        print(np.arange(n_items))
         results = []
         test_history['pred'] = 0
         for user_id in test_history['user_id']:
             print(user_id)
-            recom = mf_model.predict(user_id, np.arange(n_items), num_threads=4)
+            user_x = user_dict[user_id]
+            print(user_x)
+            recom = mf_model.predict(user_x, np.arange(n_items), num_threads=4)
             recom = pd.Series(recom)
             recom.sort_values(ascending=False, inplace=True)
             if (len(results) == 0):
@@ -167,10 +179,7 @@ def do_lightfm(train, test, data, return_pred, dataset):
                                       n_components=30, loss='warp', epoch=40, n_jobs=4)
         # Create User Dict
         user_dict = create_user_dict(interactions=interactions)
-        # Create Item dict
-        products_dict = create_item_dict(df = data.reset_index(),
-                                   id_col = 'card_id',
-                                   name_col = 'card_id')
+
         ## Creating item-item distance matrix
         item_item_dist = create_item_emdedding_distance_matrix(model = mf_model,
                                                            interactions = interactions)
