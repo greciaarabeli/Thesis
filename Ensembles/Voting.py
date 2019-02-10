@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 from munkres import Munkres #Hungarian algorithm
+import sys
+import copy
 
 
 
@@ -132,8 +134,10 @@ def transpose(array):
     return list(map(list, zip(*array)))
 
 """ list_ensembles is a list of list of the labels of each point in each clustering"""
-def do_voting(list_ensembles):
+def do_voting(list_ensembles, nEnsCluster, iterations, verbose, N_clusters_max, hdf5_file_name):
   relabeled_clusters = relabel_cluster(list_ensembles)
   final_ensemble=voting(relabeled_clusters)
   return final_ensemble
+  
+
   
