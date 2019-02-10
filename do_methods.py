@@ -67,6 +67,7 @@ for dataset in dataset_list:
      
     
     # SINGLE CLUSTER
+    clustering_labels=pd.DataFrame()
     b=0
     for clustering in single_clustering_list:
         clustering_labels_b=clustering(train, test,data, num_clusters, batch, dataset)
