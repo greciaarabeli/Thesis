@@ -1,7 +1,7 @@
 import networkx as nx
 from community import community_louvain
 import pandas as pd
-import numpy as np
+
 
 
 """Function to make clustering in data using Louvain algorithm
