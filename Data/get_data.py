@@ -41,26 +41,56 @@ def missing_impute(df):
 def get_data_batch(dataset_name, batch):
     if dataset_name=='instacart':
         chunksize = 10 ** 6
-        chunks_train = pd.read_csv("instacart/1_train.csv", chunksize=chunksize, index_col=0)
+        chunks_train = pd.read_csv("/home/grecia/Dropbox/SKOLTECH/thesis/data_sets/instacart/1_train.csv", chunksize=chunksize, index_col=0)
         train = pd.concat(valid(chunks_train, batch))
 
-        chunks_test = pd.read_csv("instacart/1_test.csv", chunksize=chunksize, index_col=0)
+        chunks_test = pd.read_csv("/home/grecia/Dropbox/SKOLTECH/thesis/data_sets/instacart/1_test.csv", chunksize=chunksize, index_col=0)
         test = pd.concat(valid(chunks_test, batch))
 
         data=0
+        
+        #Mean, min, max number of products per order
+        f_products = train.groupby(['user_id'])['total'].agg(['min', 'max', 'mean']).add_prefix('Total').reset_index()
+        train=train.merge(f_products, on='user_id', how='left')
+
+        #Number of orders
+        f_orders = train.groupby(['user_id'])['order_number'].agg(['max']).add_prefix('order_number').reset_index()
+        train=train.merge(f_orders, on='user_id',  how='left')
+
+        #Mean, min, max days between orders
+        f_days = train.groupby(['user_id'])['days_since_prior_order'].agg(['min', 'max', 'mean']).add_prefix('days_since_prior_order').reset_index()
+        train=train.merge(f_days, on='user_id',  how='left')
+
+        #reorder mean, min, max of products per order
+        total_reorder=train[train['reordered']==1].groupby(['order_id']).size().reset_index(name='total_reorder')
+        train=train.merge(total_reorder, on='order_id',  how='left')
+        f_reorder=train.groupby(['user_id'])['total_reorder'].agg(['min', 'max', 'mean']).add_prefix('reorder').reset_index()
+        train=train.merge(f_reorder, on='user_id',  how='left')
+
+        #Mean, min, max hours for orders
+        f_hour = train.groupby(['user_id'])['order_hour_of_day'].agg(['min', 'max', 'mean']).add_prefix('order_hour_of_day').reset_index()
+        train=train.merge(f_hour, on='user_id',  how='left')
+
+        #average day of week
+        f_dow = train.groupby(['user_id'])['order_dow'].agg(['mean']).add_prefix('order_dow').reset_index()
+        train=train.merge(f_dow, on='user_id',  how='left')
+
+        train=train.fillna(0)
+        test=test.fillna(0)
+
 
     else:
         chunksize = 10 ** 6
-        chunks_train = pd.read_csv("1_train.csv", parse_dates=["first_active_month"],chunksize=chunksize, index_col=0)
+        chunks_train = pd.read_csv("/home/grecia/Dropbox/SKOLTECH/thesis/data_sets/ELO/1_train.csv", parse_dates=["first_active_month"],chunksize=chunksize, index_col=0)
         train = pd.concat(valid(chunks_train, batch))
 
-        chunks_test = pd.read_csv("1_test.csv", parse_dates=["first_active_month"], chunksize=chunksize, index_col=0)
+        chunks_test = pd.read_csv("/home/grecia/Dropbox/SKOLTECH/thesis/data_sets/ELO/1_test.csv", parse_dates=["first_active_month"], chunksize=chunksize, index_col=0)
         test = pd.concat(valid(chunks_test, batch))
 
-        chunks_data= pd.read_csv("1_historical_transactions.csv",parse_dates=['purchase_date'], chunksize=chunksize, index_col=0)
+        chunks_data= pd.read_csv("/home/grecia/Dropbox/SKOLTECH/thesis/data_sets/ELO/1_historical_transactions.csv",parse_dates=['purchase_date'], chunksize=chunksize, index_col=0)
         data= pd.concat(valid(chunks_data, batch))
 
-        merchants = pd.read_csv('merchants.csv')
+        merchants = pd.read_csv('/home/grecia/Dropbox/SKOLTECH/thesis/data_sets/ELO/merchants.csv')
 
         for df in [train, test, merchants]:  # , data]:
             missing_impute(df)
