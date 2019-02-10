@@ -26,6 +26,8 @@ def cluster_features(train, test, data, num_cluster, batch, dataset):
         y_pred_train_df= y_pred_train_df.rename({0: 'cluster'}, axis='columns')
         y_pred_train_df['batch'] = batch
         y_pred_train_df['type_cluster']='cluster_features'
+        
+        return y_pred_train_df
 
     else:
         train_test=train.append(test)
@@ -36,4 +38,5 @@ def cluster_features(train, test, data, num_cluster, batch, dataset):
         y_pred_test_df= y_pred_test_df.rename({0: 'cluster'}, axis='columns')
         y_pred_test_df['batch'] = batch
         y_pred_test_df['type_cluster']='cluster_features'
-    return y_pred_test_df
+    
+        return y_pred_test_df
