@@ -13,6 +13,18 @@
 
 import numpy as np
 import pandas as pd
+from sklearn.metrics import mean_squared_error
+
+def calculate_prf(y_true, y_pred):
+    y_true = set(y_true)
+    y_pred = set(y_pred)
+    cross_size = len(y_true & y_pred)
+    if cross_size == 0: return 0,0,0.
+    p = 1. * cross_size / len(y_pred)
+    r = 1. * cross_size / len(y_true)
+    f1= 2 * p * r / (p + r)
+    return p,r,f1
+
 
 def easiest(train, test, data, return_pred, dataset):
     if dataset=='instacart':
@@ -45,15 +57,15 @@ def easiest(train, test, data, return_pred, dataset):
         n = len(y_true)
         print(n)
         for i in y_true.index:
-            p, r, f1 = Evrecsys.calculate_prf(y_true[i], y_pred[i])
+            p, r, f1 = calculate_prf(y_true[i], y_pred[i])
             sum_precision = sum_precision + p
             sum_recall = sum_recall + r
             sum_fscore = sum_fscore + f1
 
         if return_pred==0:
-            return sum_recall/n,sum_precision/n ,sum_fscore/n
+            return sum_fscore/n
         else:
-            return sum_recall/n,sum_precision/n ,sum_fscore/n, y_pred, y_true
+            return sum_fscore/n, y_pred,
     
     
     else:
@@ -65,7 +77,7 @@ def easiest(train, test, data, return_pred, dataset):
         pred=test.groupby(["card_id"])["target_y"].aggregate("mean").reset_index()
         pred=pred.merge(test[['card_id','target_x']], on='card_id',how='left').drop_duplicates()
         if return_pred==0:
-            return np.sqrt(mean_squared_error(pred.target_y, pred.target_x)), 
+            return np.sqrt(mean_squared_error(pred.target_y, pred.target_x))
         else:
             return np.sqrt(mean_squared_error(pred.target_y, pred.target_x)), pred[['card_id', 'target_y']]
         
