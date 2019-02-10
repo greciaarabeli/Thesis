@@ -11,6 +11,8 @@ import numpy as np
 import pandas as pd
 from functools import reduce
 from six.moves import reduce
+import sys
+
 
 def memory():
     """Determine memory specifications of the machine.
@@ -26,8 +28,8 @@ def memory():
            mem_info[k] = int(v)
            
     return mem_info
-    
- def MCLA(hdf5_file_name, cluster_runs, verbose = False, N_clusters_max = None):
+
+def MCLA(hdf5_file_name, cluster_runs, verbose = False, N_clusters_max = None):
     """Meta-CLustering Algorithm for a consensus function.
     
     Parameters
@@ -324,7 +326,7 @@ def one_to_max(array_in):
     return result
     
     
- def hmetis(hdf5_file_name, N_clusters_max, w = None):
+def hmetis(hdf5_file_name, N_clusters_max, w = None):
     """Gives cluster labels ranging from 1 to N_clusters_max for 
         hypergraph partitioning required for HGPA.
     Parameters
@@ -395,7 +397,7 @@ def HGPA(hdf5_file_name, cluster_runs, verbose = False, N_clusters_max = None):
     return hmetis(hdf5_file_name, N_clusters_max)
     
     
- def get_chunk_size(N, n):
+def get_chunk_size(N, n):
     """Given a two-dimensional array with a dimension of size 'N', 
         determine the number of rows or columns that can fit into memory.
     Parameters
@@ -436,7 +438,7 @@ def HGPA(hdf5_file_name, cluster_runs, verbose = False, N_clusters_max = None):
         sys.exit(1)
         
   
- def get_compression_filter(byte_counts):
+def get_compression_filter(byte_counts):
     """Determine whether or not to use a compression on the array stored in
         a hierarchical data format, and which compression library to use to that purpose.
         Compression reduces the HDF5 file size and also helps improving I/O efficiency
@@ -693,7 +695,7 @@ def sgraph(N_clusters_max, file_name):
     return labels
     
     
-  def wgraph(hdf5_file_name, w = None, method = 0):
+def wgraph(hdf5_file_name, w = None, method = 0):
     """Write a graph file in a format apposite to later use by METIS or HMETIS.
     
     Parameters
@@ -1037,7 +1039,7 @@ def get_compression_filter(byte_counts):
     return FILTERS
     
     
- def store_hypergraph_adjacency(hypergraph_adjacency, hdf5_file_name):
+def store_hypergraph_adjacency(hypergraph_adjacency, hdf5_file_name):
     """Write an hypergraph adjacency to disk to disk in an HDF5 data structure.
     
     Parameters
@@ -1070,7 +1072,7 @@ def get_compression_filter(byte_counts):
             
             
    
- def create_membership_matrix(cluster_run):
+def create_membership_matrix(cluster_run):
     """For a label vector represented by cluster_run, constructs the binary 
         membership indicator matrix. Such matrices, when concatenated, contribute 
         to the adjacency matrix for a hypergraph representation of an 
@@ -1107,8 +1109,9 @@ def get_compression_filter(byte_counts):
 
         return scipy.sparse.csr_matrix((data, indices, indptr), shape = (cluster_ids.size, cluster_run.size))
         
-        
-  def build_hypergraph_adjacency(cluster_runs):
+
+
+def build_hypergraph_adjacency(cluster_runs):
     """Return the adjacency matrix to a hypergraph, in sparse matrix representation.
     
     Parameters
@@ -1134,7 +1137,7 @@ def get_compression_filter(byte_counts):
     return hypergraph_adjacency
     
     
-def cluster_ensembles(cluster_runs, hdf5_file_name = None, verbose = False, N_clusters_max = None):
+def cluster_ensembles(cluster_runs, hdf5_file_name, verbose, N_clusters_max):
     """Call up to three different functions for heuristic ensemble clustering
        (namely CSPA, HGPA and MCLA) then select as the definitive
        consensus clustering the one with the highest average mutual information score 
@@ -1173,9 +1176,9 @@ def cluster_ensembles(cluster_runs, hdf5_file_name = None, verbose = False, N_cl
     for Combining Multiple Partitions".
     In: Journal of Machine Learning Research, 3, pp. 583-617. 2002  
     """
-
     if hdf5_file_name is None:
         hdf5_file_name = './Cluster_Ensembles.h5'
+        print(hdf5_file_name)
     fileh = tables.open_file(hdf5_file_name, 'w')
     fileh.create_group(fileh.root, 'consensus_group')
     fileh.close()
@@ -1208,6 +1211,6 @@ def cluster_ensembles(cluster_runs, hdf5_file_name = None, verbose = False, N_cl
     return cluster_ensemble[np.argmax(score)]
     
     
-do_graph(list_ensembles, verbose = True, N_clusters_max = 5):
-    final_clustering=cluster_ensembles(list_ensembles, verbose, N_clusters_max)
+def do_graph(list_ensembles, nEnsCluster, iterations, verbose, N_clusters_max, hdf5_file_name):
+    final_clustering=cluster_ensembles(list_ensembles, hdf5_file_name,verbose, N_clusters_max)
     return final_clustering
