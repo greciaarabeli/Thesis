@@ -16,6 +16,16 @@ from sklearn.metrics import mean_squared_error
 import numpy as np
 import pandas as pd
 
+def calculate_prf(y_true, y_pred):
+    y_true = set(y_true)
+    y_pred = set(y_pred)
+    cross_size = len(y_true & y_pred)
+    if cross_size == 0: return 0,0,0.
+    p = 1. * cross_size / len(y_pred)
+    r = 1. * cross_size / len(y_true)
+    f1= 2 * p * r / (p + r)
+    return p,r,f1
+
 def do_catboost(train, test,data, return_pred, dataset): 
     cols_to_use=['feature_1', 'feature_2', 'feature_3',
         'num_transactions', 'sum_trans', 'mean_trans',
@@ -24,9 +34,9 @@ def do_catboost(train, test,data, return_pred, dataset):
     if dataset=='instacart':
         orders_set_test=test.order_id.unique()
         y_train = train['reordered']
-        X_train = train.drop(['reordered', 'eval_set', 'batch', 'total','product_name', 'add_to_cart_order'], axis=1)
+        X_train = train.drop(['reordered', 'eval_set', 'total','product_name', 'add_to_cart_order'], axis=1)
         X_test = test.drop_duplicates(subset=['order_id', 'user_id'], keep='first')
-        X_test=X_test.drop(['product_id','add_to_cart_order', 'reordered', 'eval_set', 'product_name', 'aisle_id', 'department_id', 'batch'], axis=1)
+        X_test=X_test.drop(['product_id','add_to_cart_order', 'reordered', 'eval_set', 'product_name', 'aisle_id', 'department_id'], axis=1)
         X_train_sub=train.drop_duplicates(subset=['product_id', 'user_id'], keep='first')
         X_train_sub=X_train_sub[['product_id', 'user_id', 'aisle_id','department_id']]
         X_test=pd.merge(left=X_test, right=X_train_sub, how='right',on=['user_id'])
@@ -54,16 +64,16 @@ def do_catboost(train, test,data, return_pred, dataset):
             else:
                 y_hat = 'nan'
 
-            p, r, f1 = Evrecsys.calculate_prf(y, y_hat)
+            p, r, f1 = calculate_prf(y, y_hat)
             sum_precision = sum_precision + p
             sum_recall = sum_recall + r
             sum_fscore = sum_fscore + f1
 
 
         if return_pred==0:
-            return sum_recall/n,sum_precision/n ,sum_fscore/n
+            return sum_fscore/n
         else:
-            return sum_recall/n,sum_precision/n ,sum_fscore/n, y_pred
+            return sum_fscore/n, y_pred
 
        
 
@@ -93,4 +103,4 @@ def do_catboost(train, test,data, return_pred, dataset):
             return np.sqrt(mean_squared_error(predict_test.target.values, y_test))
         else:
             return np.sqrt(mean_squared_error(predict_test.target.values, y_test)), predict_test
-     print('FINISH CATBOOST')
+    print('FINISH CATBOOST')
