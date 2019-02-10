@@ -63,7 +63,7 @@ def gatherPartitions(list_ensembles, N):
     return y
     
     
-ef genKj(y):
+def genKj(y):
     '''
     Generates the K(j) H-array that contains the tuples of unique 
     clusters of each j-th partition, eg: K = [(X,Y), (A,B)] 
@@ -82,7 +82,7 @@ ef genKj(y):
     
     
     
- def initParameters(nEnsCluster, y, K):
+def initParameters(nEnsCluster, y, K):
         '''
         The function initializes the parameters of the mixture model.
         '''    
@@ -109,7 +109,7 @@ ef genKj(y):
         ExpZ = initExpZ(nEnsCluster, y)
         return alpha, v, ExpZ
         
- def expectation(ExpZ, y, K, v, alpha):
+def expectation(ExpZ, y, K, v, alpha):
     '''
     Compute the Expectation (ExpZ) according to parameters.
     Obs: y(N,H) Kj(H) alpha(M) v(H,M,K(j)) ExpZ(N,M)
@@ -150,7 +150,7 @@ ef genKj(y):
     return ExpZ
     
     
- def maximization(alpha, ExpZ, y, K, v):
+def maximization(alpha, ExpZ, y, K, v):
     '''
     Update the parameters taking into account the ExpZ computed in the 
     Expectation (ExpZ) step.
@@ -204,6 +204,7 @@ References
 Topchy, Jain, and Punch, "A mixture model for clustering ensembles Proc. SIAM Int. Conf. Data Mining (2004)"
 """
 
-def do_mixturemodels(list_ensembles, nEnsCluster=5, iterations=10):
+def do_mixturemodels(list_ensembles, nEnsCluster, iterations, verbose, N_clusters_max, hdf5_file_name):
   mixtureObj = emProcess(list_ensembles,list_ensembles.shape[1] , nEnsCluster, iterations)
   return mixtureObj
+
