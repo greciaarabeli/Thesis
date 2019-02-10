@@ -157,7 +157,7 @@ for dataset in dataset_list:
         else:
             final_ensemble_df['ensemble']=ensemble_clustering_name[d]
             final_ensemble_df['database']='elo'
-            final_ensemble_df['user_id']=final_ensemble_df['card_id']
+            final_ensemble_df['card_id']=final_ensemble_df['user_id']
             final_ensemble_df['batch']=batch
             final_ensemble_df['clustering']='no_cluster'
             clustering_labels=clustering_labels.append(final_ensemble_df)
