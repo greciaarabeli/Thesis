@@ -66,22 +66,31 @@ def maximization(dataFrame, parameters, N, M, H):
     parameters['lambda'][0]=len_points/N
     return parameters
 
+def concatenate(list_ensembles):
+    l=list_ensembles.T
+    voting_matrix=np.empty([l.shape[0]])
+    for i in range(l.shape[0]):
+        print(i)
+        a=str(int(l[i][0]))
+        for j in range(1,l.shape[1]):
+            print(j)
+            a=a+str(int(l[i][j]))
+        voting_matrix[i]=int(a)
+    return voting_matrix
+
 
 def emProcess(list_ensembles,nEnsCluster, iterations):
     #Choose three random index no's from the length of dataset
-    N=list_ensembles.shape[1] 
-    H = len(list_ensembles)
+    
+    voting_matrix=concatenate(list_ensembles)
+    N=len(voting_matrix) 
+    H = 1
     M=nEnsCluster
-    X=np.concatenate(list_ensembles).reshape(N,H)
 
-    listParts = np.concatenate(list_ensembles).reshape(H,N)
-    df = [] 
-    [df.append(listParts[:,i]) for i in range(N)]
-
-    df = pd.DataFrame(df, columns= np.arange(H))
+    df = pd.DataFrame(voting_matrix, columns= np.arange(H))
     df.index.name = 'objs'
     df.columns.name = 'partition'
-    
+    X=df.values
     #Initialize parameters
 
     k=[random.randrange(len(X)) for _ in range(M)]
