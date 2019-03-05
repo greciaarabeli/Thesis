@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import sys
-import matplotlib.pyplot as plt
 import random
 import scipy as sc
 import random as rand
@@ -66,7 +65,6 @@ def MStep(r, X, mu, cov, N,M,H):
 
 
 def emProcess(list_ensembles, nEnsCluster, iterations):
-    # N is the number of points in data, M number of gaussians , H number of features.
     N=list_ensembles.shape[1] 
     H = len(list_ensembles)
     M=nEnsCluster
@@ -79,7 +77,7 @@ def emProcess(list_ensembles, nEnsCluster, iterations):
     X=df.values
     
     # Initialize parameters randomly
-    sdDiff = 4
+    sdDiff = 2
     SDClass = np.random.rand(1,M)+sdDiff
     Cov = [PosSymDefMatrix(H,i) for i in SDClass[0]]
     broadness = 2
@@ -153,6 +151,10 @@ def emProcess(list_ensembles, nEnsCluster, iterations):
         
     return final_part
 
+'''Input    
+    list ensemble: array of arrays wit the labels of each clustering
+    nEnsCluster: number of clusters to find
+    iterations: max number of iterations for EM Process '''
 
 def do_gmm(list_ensembles, nEnsCluster, iterations, verbose, N_clusters_max, hdf5_file_name):
     mixtureObj = emProcess(list_ensembles, nEnsCluster, iterations)
