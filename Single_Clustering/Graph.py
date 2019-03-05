@@ -10,7 +10,8 @@ import pandas as pd
 
 def cluster_graph(train, test,data, num_cluster, batch, dataset):
     if dataset=='instacart':
-        FG = nx.from_pandas_edgelist(train, source='user_id', target='product_name', edge_attr=True)
+        train['product_id_str'] = 'pro_'+ train['product_id'].astype(str)
+        FG = nx.from_pandas_edgelist(train, source='user_id', target='product_id_str', edge_attr=True)
         parts = community_louvain.best_partition(FG)
         y_pred_df = pd.DataFrame.from_dict(parts, orient='index', columns=['cluster']).reset_index()
         y_pred_df=y_pred_df.rename({'index': 'user_id'}, axis='columns')
