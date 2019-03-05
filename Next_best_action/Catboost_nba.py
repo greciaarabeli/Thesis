@@ -44,7 +44,7 @@ def do_catboost(train, test,data, return_pred, dataset):
         X_train = X_train[['order_id', 'product_id', 'user_id', 'order_number', 'order_dow','order_hour_of_day', 'days_since_prior_order', 'aisle_id','department_id']]
 
         model_cat = CatBoostClassifier(iterations=10, learning_rate=0.02, depth=10, loss_function='Logloss')
-        model_cat.fit(X_train, y_train)
+        model_cat.fit(X_train, y_train, cat_features= [0, 1, 2, 4, 7,8])
         predict_labels= model_cat.predict(X_test)
 
         X_test['pred']=predict_labels
