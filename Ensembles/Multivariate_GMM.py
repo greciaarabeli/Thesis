@@ -139,7 +139,7 @@ def emProcess(list_ensembles, nEnsCluster, iterations):
 
 '''Input    
     list ensemble: array of arrays wit the labels of each clustering
-    nEnsCluster: number of clusters to find
+    nEnsCluster: max number of clusters to find
     iterations: max number of iterations for EM Process 
     
     Output
