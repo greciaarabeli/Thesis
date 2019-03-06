@@ -71,7 +71,7 @@ def emProcess(list_ensembles, nEnsCluster, iterations):
     initMu = np.empty([nEnsCluster, H])
     initCov = np.empty([H, H, nEnsCluster])
 
-    for j in range(M):
+    for j in range(nEnsCluster):
 
         initMu[j,:] = np.random.random(H)*np.amax(X, axis=0)
         initCov[:,:,j] = np.mean(np.array(Cov), axis=0)+broadness
