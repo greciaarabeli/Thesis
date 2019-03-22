@@ -1,2 +1,2 @@
 # Thesis
-Clustering Ensemble based Gaussian Process for Next Best Action
+Clustering Ensemble Gaussian Process-based for Next Best Action
