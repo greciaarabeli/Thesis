@@ -122,12 +122,16 @@ def joint_qual_diver(data, c_list, alpha):
 
 """ Return the elements of the ensemble that has join quality and diversity score above mean"""
 #alpha is the weight assigned to quality
-def ensembles_above_threshold(list_ensembles, data,alpha):
-    alpha=0.5
+#threshold is the minimum score that eanch clustering base should have to be part of the ensemble
+def ensembles_above_threshold(list_ensembles, data,alpha, threshold):
     final_score= joint_qual_diver(data, list_ensembles, alpha)
     #let just partitions with final score higher than the mean
-    index_mean=np.where(final_score >= np.mean(final_score))
-    fn=list_ensembles[index_mean]
+    if threshold='mean':
+        index_mean=np.where(final_score >= np.mean(final_score))
+        fn=list_ensembles[index_mean]
+    else:
+        index_threshold=np.where(final_score >= threshold)
+        fn=list_ensembles[index_threshold]
     return fn
     
     
