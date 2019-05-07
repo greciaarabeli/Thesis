@@ -126,7 +126,7 @@ def joint_qual_diver(data, c_list, alpha):
 def ensembles_above_threshold(list_ensembles, data,alpha, threshold):
     final_score= joint_qual_diver(data, list_ensembles, alpha)
     #let just partitions with final score higher than the mean
-    if threshold='mean':
+    if threshold=='mean':
         index_mean=np.where(final_score >= np.mean(final_score))
         fn=list_ensembles[index_mean]
     else:
