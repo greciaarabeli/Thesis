@@ -122,7 +122,7 @@ def emProcess(list_ensembles,nEnsCluster, iterations, data):
     params = params.transpose()
     
 
-    while shift > epsilon:
+    while shift > epsilon or iters<iterations:
         iters += 1
         updated_labels = expectation(df_copy.copy(), params, N, M, H)
         updated_parameters = maximization(updated_labels, params.copy(), N, M, H)

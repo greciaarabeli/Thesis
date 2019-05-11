@@ -110,18 +110,16 @@ def replaced(array, u1, u2, cor):
 
 def voting(clusters):
     #Transpose Clusters
-    print(np.shape(clusters))
+    #print(np.shape(clusters))
     clusters = transpose(clusters)
-    print(np.shape(clusters))
-    print(len(clusters))
-    print(len(np.unique(clusters)))
+    #print(np.shape(clusters))
+    #print(len(clusters))
+    #print(len(np.unique(clusters)))
     counter= np.zeros(shape=(len(clusters),len(np.unique(clusters))))
     b=0
     for i in clusters:
-        print('b=',b)
         a=0
         for j in np.unique(clusters):
-            print('a=',a)
             counter[b][a]=i.count(j)
             a=a+1
         b=b+1
