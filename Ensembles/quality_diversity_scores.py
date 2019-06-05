@@ -66,7 +66,7 @@ def dunn_index(data, labels):
 ### CALINSKI - HARABASZ ###
 def ch_score(data, labels):
     s=calinski_harabaz_score(data, labels)
-    return np.exp(-s)
+    return s
 
 ### QUALITY ###
 def do_quality(data, c_list):
