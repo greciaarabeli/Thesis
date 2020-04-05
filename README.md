@@ -1,2 +1,2 @@
 # Thesis
-Clustering Ensemble Gaussian Process-based for Next Best Action
+Clustering ensemble based Gaussian Models for next customer action prediction
